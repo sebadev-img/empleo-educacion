@@ -1,0 +1,13 @@
+.main-left {
+  position: fixed;
+  width: 400px;
+  height: 100%;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background-color: #f4f4f4;
+  z-index: -1;
+}
+
+.main-right {
+}

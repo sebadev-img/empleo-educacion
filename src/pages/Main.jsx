@@ -1,6 +1,10 @@
 import React from "react";
 import Navbar from "../components/navbar/Navbar";
 import List from "../components/list/List";
+import Search from "../components/search/Search";
+import Filter from "../components/filter/Filter";
+
+import "./Main.css";
 
 import { actoService } from "../services/actoService";
 import { establecimientoService } from "../services/establecimientoService";
@@ -16,6 +20,7 @@ function Main() {
   const [establecimientos, setEstablecimientos] = useState([]);
   const [hayTrabajos, setHayTrabajos] = useState(false);
   const [lista, setLista] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
   const buscarActos = async () => {
     try {
@@ -32,6 +37,7 @@ function Main() {
       const nuevoEstablecimiento = await establecimientoService.allInstance(
         idActo
       );
+      //const nuevoEstablecimiento = await establecimientoService.allInstance(1045);
       //console.log("establecimientos", nuevoEstablecimiento);
       setEstablecimientos(nuevoEstablecimiento);
     } catch (error) {
@@ -68,6 +74,7 @@ function Main() {
           idEstablecimiento,
           idActo
         );
+        //const trabajosEstablecimiento = await buscarTrabajosPorEstablecimiento(idEstablecimiento,1045);
         listaTrabajos = [...listaTrabajos, trabajosEstablecimiento];
         const arrUniq = [
           ...new Map(listaTrabajos.map((v) => [v.id, v])).values(),
@@ -109,15 +116,51 @@ function Main() {
   }, [establecimientos]);
 
   useEffect(() => {
+    console.log("entra al useeeee");
     armarListaOferta();
     setLista(listaOfertas);
   }, [hayTrabajos]);
 
+  useEffect(() => {
+    const timeOut = setTimeout(() => {
+      console.log("hola");
+      // if search vacio
+      let listaFiltrada;
+      if (searchText) {
+        listaFiltrada = listaOfertas.filter((trabajo) => {
+          const descripcion = trabajo.descripcion.toLowerCase();
+          const texto = searchText.toLowerCase();
+          if (descripcion.includes(texto)) {
+            return trabajo;
+          }
+          return false;
+        });
+      } else {
+        listaFiltrada = listaOfertas;
+      }
+      setLista(listaFiltrada);
+    }, 500);
+    return () => {
+      clearTimeout(timeOut);
+    };
+  }, [searchText]);
+
+  console.log("main render");
+
   return (
     <div>
       <Navbar></Navbar>
+
       {hayTrabajos ? (
-        <List listaTrabajos={lista}></List>
+        <div className="mainpage-container">
+          <div className="main-left">
+            <Filter></Filter>
+          </div>
+          <div className="main-right">
+            <Search setSearchText={setSearchText}></Search>
+            <List listaTrabajos={lista}></List>
+          </div>
+        </div>
       ) : (
         <p>no hay trabajos</p>
       )}
